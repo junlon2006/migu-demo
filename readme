@@ -1,0 +1,6 @@
+第一步:
+main.c 修改MUSIC_URL的宏，换成音乐的URL
+第二步：
+gcc -o demo uni_log.c uni_mp3_player.c main.c -I. -L./lib -lavcodec -lavcodec -lavformat -lavutil -lswresample -lpthread
+第三步：
+./demo
