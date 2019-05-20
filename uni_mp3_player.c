@@ -431,10 +431,13 @@ static int _audio_player_callback() {
   return decode_byte_len;
 }
 
+int retrieve_done = 0;
+
 static void* __retrieve_tsk(void *args) {
   while (1) {
     if (AUDIO_RETRIEVE_DATA_FINISHED == _audio_player_callback()) break;
   }
+  retrieve_done = 1;
   return NULL;
 }
 
@@ -478,6 +481,7 @@ static int _mp3_fsm(Mp3Event event, void *param) {
   switch (g_mp3_player.state) {
     case MP3_IDLE_STATE:
       if (MP3_PLAY_EVENT == event) {
+        _mp3_release_internal();
         if (0 == _mp3_prepare_internal((char *)param)) {
           _mp3_start_internal();
           _mp3_set_state(MP3_PLAYING_STATE);

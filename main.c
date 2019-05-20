@@ -27,20 +27,39 @@
 #include <unistd.h>
 
 #define MAIN_TAG   "main"
-#define MUSIC_URL  "http://open.tyst.migu.cn/public/product5th/product30/2019/03/21/2018%E5%B9%B410%E6%9C%8811%E6%97%A521%E7%82%B925%E5%88%86%E6%89%B9%E9%87%8F%E9%A1%B9%E7%9B%AE%E5%8D%8E%E7%BA%B311%E9%A6%96-2/%E6%A0%87%E6%B8%85%E9%AB%98%E6%B8%85/MP3_128_16_Stero/6005751GYK6.mp3?channelid=08&msisdn=ca3af03b-9e8f-4fd5-840d-4216ebb45bc2&k=103f8806a79d9c04&t=1554276821171"
 
-int main() {
+int main(int argc, char *argv[]) {
   AudioParam param;
+  int count = 0;
   param.channels = 1;
   param.rate = 16000;
   param.bit = 16;
+  if (argc != 2) {
+    LOGE(MAIN_TAG, "argv invalid");
+    return -1;
+  }
   if (0 != Mp3Init(&param)) {
     LOGE(MAIN_TAG, "mp3 init failed");
     return -1;
   }
-  Mp3Play(MUSIC_URL);
-  while (1) {
-    sleep(1);
+RE_START:
+  if (count == 100) {
+    goto L_END;
   }
+  LOGT(MAIN_TAG, "begin to play %s", argv[1]);
+  extern int retrieve_done;
+  retrieve_done = 0;
+  Mp3Play(argv[1]);
+  while (1) {
+    if (retrieve_done == 1) {
+      Mp3Stop();
+      LOGT(MAIN_TAG, "### retrieve_done[%d] ###", ++count);
+      usleep(1000 * 1000);
+      goto RE_START;
+    }
+    usleep(1000 * 100);
+  }
+L_END:
+  usleep(1000 * 100);
   return 0;
 }
